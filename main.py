@@ -1,10 +1,10 @@
 #Retrieve data from the coinbase websocekt API
 import requests
 import json
-import pandas as pd
-import numpy as np
+import csv
 from websocket import create_connection
 import time
+import pandas as pd
 
 
 BTC_price = 'https://api.coinbase.com/v2/prices/BTC-USD/spot'
@@ -47,15 +47,36 @@ params = {"type": "subscribe", "product_ids": ["BTC-USD"],
 "channels": ["heartbeat", {"name": "ticker", "product_ids": ["BTC-USD"]}]}
 
 counter = 0
+f = open('VMAP_Data.json', 'a')
 while True:
     ws.send(json.dumps(params))
     result = ws.recv()
     print(result)
+
     time.sleep(1)
-    converted = json.loads(result)
+
+    csv_file = csv.writer(f)
+    csv_file.writerow([result])
+    # for item in converted['price']:
+    #     price = csv_file.writerow([item['price']])
+    #     csv_file.writerow(price)
     counter += 1
-    if counter == 200:
+    if counter == 5:
+        f.close()
         break
+
 
 ws.close()
 
+
+# Read the csv file
+data = pd.read_csv('VMAP_Data.csv')
+
+# Print it out if you want
+print(data)
+
+
+df = pd.read_json('VMAP_Data.json')
+
+# data = df.to_json()
+print(df)
